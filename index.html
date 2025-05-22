@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Teams App</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 2rem;
+      max-width: 600px;
+      margin: auto;
+    }
+    .hidden {
+      display: none;
+    }
+    input, textarea, button {
+      width: 100%;
+      margin-top: 0.5rem;
+      margin-bottom: 1rem;
+      padding: 0.5rem;
+      font-size: 1rem;
+    }
+    button {
+      background-color: #2563eb;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #1d4ed8;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Team formulier -->
+  <div id="team-form">
+    <h2>Team registratie</h2>
+    <form id="teamForm">
+      <label>
+        Naam student 1:
+        <input type="text" name="student1" required />
+      </label>
+      <label>
+        Naam student 2 (optioneel):
+        <input type="text" name="student2" />
+      </label>
+      <button type="submit">Verder naar plan van aanpak</button>
+    </form>
+  </div>
+
+  <!-- Plan van aanpak formulier -->
+  <div id="plan-form" class="hidden">
+    <h2>Plan van aanpak</h2>
+    <form id="planForm">
+      <label>
+        Onderwerp:
+        <input type="text" name="onderwerp" required />
+      </label>
+      <label>
+        Uitleg van de oplossing met user stories:
+        <textarea name="uitleg" rows="4" required></textarea>
+      </label>
+      <label>
+        Benodigde technieken:
+        <textarea name="technieken" rows="3" required></textarea>
+      </label>
+      <label>
+        Feedback van Sjoerd:
+        <textarea name="feedback" rows="3"></textarea>
+      </label>
+      <button type="submit">Verzenden</button>
+    </form>
+  </div>
+
+  <script>
+    const teamForm = document.getElementById('teamForm');
+    const planForm = document.getElementById('planForm');
+
+    teamForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      document.getElementById('team-form').classList.add('hidden');
+      document.getElementById('plan-form').classList.remove('hidden');
+    });
+
+    planForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      const formData = new FormData(planForm);
+      const data = Object.fromEntries(formData.entries());
+      alert(\"Plan verzonden:\\n\" + JSON.stringify(data, null, 2));
+    });
+  </script>
+
+</body>
+</html>
