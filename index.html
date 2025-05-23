@@ -108,4 +108,134 @@ const data = {
         "SLB J5": 4, "SLB J3": 5, "Stage P1": 30, "Minor Innovation & Creativity P1": 70, "K1 Context: Startup ": 50, "J1 SLB: vaardigheden samenwerken teams": 10, "P1 Project": 70
       },
       "Lelkes, Paul": {
-        "
+        "Afstuderen blok 1": 40, "Stage P1": 60
+      },
+      "Loos, Karlijn": {
+        "SLB J5": 5, "Stage voorlichting of workshops P1": 7, "K1 Business cases": 45, "P1 Project": 70
+      },
+      "Mols, Ine": {
+        "P1 Project": 40
+      },
+      "Prinsen, Eric": {
+        "SLB J4": 5, "Stage P1": 30, "Stage voorlichting of workshops P1": 7, "Minor Innovation & Creativity P1": 40, "K1 Context: Enterprises ": 50
+      },
+      "Senden, Mayk": {
+        "Afstuderen kick-off": 4, "Stage P1": 30, "Stage voorlichting of workshops P1": 7, "Minor Innovation & Creativity P1": 45, "K1 Context: Startup ": 90, "K1 Business cases": 45
+      },
+      "Sprong, Niels": {
+        "Afstuderen blok 1": 40
+      },
+      "Schilder Jacqueline": {
+      }
+    }
+  }
+  // Je kunt hier eenvoudig 'P2', 'P3', 'P4' toevoegen!
+};
+
+// --- HULPFUNCTIES ---
+function getLeiders(module, periode) {
+  // Zoek wie de meeste uren heeft op deze module
+  const uren = [];
+  Object.entries(data[periode].uren).forEach(([docent, taken]) => {
+    if (taken[module]) uren.push({docent, uren: taken[module]});
+  });
+  if (uren.length === 0) return [];
+  const maxUur = Math.max(...uren.map(u => u.uren));
+  if (uren.every(u => u.uren === maxUur)) return []; // iedereen gelijk
+  return uren.filter(u => u.uren === maxUur).map(u => u.docent);
+}
+
+// --- INIT ---
+function fillDropdowns() {
+  // Periodes
+  const periodeSelect = document.getElementById('periodeSelect');
+  Object.keys(data).forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p; opt.textContent = p;
+    periodeSelect.appendChild(opt);
+  });
+  // Docenten
+  fillDocenten();
+  // Modules
+  fillModules();
+}
+function fillDocenten() {
+  const periode = document.getElementById('periodeSelect').value;
+  const docentSelect = document.getElementById('docentSelect');
+  docentSelect.innerHTML = '';
+  data[periode].docenten.forEach(naam => {
+    const opt = document.createElement('option');
+    opt.value = naam; opt.textContent = naam;
+    docentSelect.appendChild(opt);
+  });
+}
+function fillModules() {
+  const periode = document.getElementById('periodeSelect').value;
+  const moduleSelect = document.getElementById('moduleSelect');
+  moduleSelect.innerHTML = '';
+  data[periode].modules.forEach(mod => {
+    const opt = document.createElement('option');
+    opt.value = mod; opt.textContent = mod;
+    moduleSelect.appendChild(opt);
+  });
+}
+
+// --- SCHERMEN ---
+function showScreen(nr) {
+  document.getElementById('screen1').classList.remove('active');
+  document.getElementById('screen2').classList.remove('active');
+  if (nr === 1) document.getElementById('screen1').classList.add('active');
+  if (nr === 2) document.getElementById('screen2').classList.add('active');
+}
+
+// --- LOGICA OVERZICHT 1 ---
+function showDocentTaken() {
+  const periode = document.getElementById('periodeSelect').value;
+  const docent = document.getElementById('docentSelect').value;
+  const taken = data[periode].uren[docent] || {};
+  let html = '<table><tr><th>Onderwijstaak</th><th>Uren</th></tr>';
+  Object.entries(taken).forEach(([taak, uren]) => {
+    if (uren > 0) html += `<tr><td>${taak}</td><td>${uren}</td></tr>`;
+  });
+  html += '</table>';
+  document.getElementById('docentTaken').innerHTML = html;
+}
+
+// --- LOGICA OVERZICHT 2 ---
+function showModuleTeam() {
+  const periode = document.getElementById('periodeSelect').value;
+  const module = document.getElementById('moduleSelect').value;
+  // Verzamel team
+  const team = [];
+  Object.entries(data[periode].uren).forEach(([docent, taken]) => {
+    if (taken[module]) team.push({docent, uren: taken[module]});
+  });
+  // Leiders
+  const leiders = getLeiders(module, periode);
+  let html = '<table><tr><th>Docent</th><th>Uren</th><th>Leider</th></tr>';
+  team.forEach(lid => {
+    const isLeider = leiders.includes(lid.docent);
+    html += `<tr><td>${lid.docent}</td><td>${lid.uren}</td><td>${isLeider ? '<span class="leader">Ja</span>' : ''}</td></tr>`;
+  });
+  html += '</table>';
+  if (team.length === 0) html = '<em>Geen teamleden voor deze module.</em>';
+  document.getElementById('moduleTeam').innerHTML = html;
+}
+
+// --- EVENT LISTENERS ---
+document.addEventListener('DOMContentLoaded', function() {
+  fillDropdowns();
+  showScreen(1);
+  showDocentTaken();
+  showModuleTeam();
+  document.getElementById('periodeSelect').addEventListener('change', function() {
+    fillDocenten(); fillModules();
+    showDocentTaken(); showModuleTeam();
+  });
+  document.getElementById('docentSelect').addEventListener('change', showDocentTaken);
+  document.getElementById('moduleSelect').addEventListener('change', showModuleTeam);
+});
+
+</script>
+</body>
+</html>
