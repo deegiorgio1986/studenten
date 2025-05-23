@@ -1,96 +1,111 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Student Teams App</title>
+  <meta charset="UTF-8">
+  <title>Onderwijstaken Overzicht</title>
   <style>
-    body {
-      font-family: sans-serif;
-      padding: 2rem;
-      max-width: 600px;
-      margin: auto;
-    }
-    .hidden {
-      display: none;
-    }
-    input, textarea, button {
-      width: 100%;
-      margin-top: 0.5rem;
-      margin-bottom: 1rem;
-      padding: 0.5rem;
-      font-size: 1rem;
-    }
-    button {
-      background-color: #2563eb;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #1d4ed8;
-    }
+    body { font-family: Arial, sans-serif; margin: 30px; }
+    .screen { display: none; }
+    .active { display: block; }
+    .nav { margin-bottom: 20px; }
+    select { margin: 0 10px 10px 0; }
+    table { border-collapse: collapse; margin-top: 10px; }
+    th, td { border: 1px solid #ccc; padding: 6px 12px; }
+    th { background: #f0f0f0; }
+    .leader { color: green; font-weight: bold; }
   </style>
 </head>
 <body>
+  <h1>Onderwijstaken Overzicht</h1>
 
-  <!-- Team formulier -->
-  <div id="team-form">
-    <h2>Team registratie</h2>
-    <form id="teamForm">
-      <label>
-        Naam student 1:
-        <input type="text" name="student1" required />
-      </label>
-      <label>
-        Naam student 2 (optioneel):
-        <input type="text" name="student2" />
-      </label>
-      <button type="submit">Verder naar plan van aanpak</button>
-    </form>
+  <div class="nav">
+    <label>Periode:
+      <select id="periodeSelect"></select>
+    </label>
+    <button onclick="showScreen(1)">Overzicht per docent</button>
+    <button onclick="showScreen(2)">Overzicht per onderwijstaak</button>
   </div>
 
-  <!-- Plan van aanpak formulier -->
-  <div id="plan-form" class="hidden">
-    <h2>Plan van aanpak</h2>
-    <form id="planForm">
-      <label>
-        Onderwerp:
-        <input type="text" name="onderwerp" required />
-      </label>
-      <label>
-        Uitleg van de oplossing met user stories:
-        <textarea name="uitleg" rows="4" required></textarea>
-      </label>
-      <label>
-        Benodigde technieken:
-        <textarea name="technieken" rows="3" required></textarea>
-      </label>
-      <label>
-        Feedback van Sjoerd:
-        <textarea name="feedback" rows="3"></textarea>
-      </label>
-      <button type="submit">Verzenden</button>
-    </form>
+  <!-- Scherm 1 -->
+  <div id="screen1" class="screen">
+    <h2>Overzicht per docent</h2>
+    <label>Naam:
+      <select id="docentSelect"></select>
+    </label>
+    <div id="docentTaken"></div>
   </div>
 
-  <script>
-    const teamForm = document.getElementById('teamForm');
-    const planForm = document.getElementById('planForm');
+  <!-- Scherm 2 -->
+  <div id="screen2" class="screen">
+    <h2>Overzicht per onderwijstaak</h2>
+    <label>Module:
+      <select id="moduleSelect"></select>
+    </label>
+    <div id="moduleTeam"></div>
+  </div>
 
-    teamForm.addEventListener('submit', function (e) {
-      e.preventDefault();
-      document.getElementById('team-form').classList.add('hidden');
-      document.getElementById('plan-form').classList.remove('hidden');
-    });
-
-    planForm.addEventListener('submit', function (e) {
-      e.preventDefault();
-      const formData = new FormData(planForm);
-      const data = Object.fromEntries(formData.entries());
-      alert(\"Plan verzonden:\\n\" + JSON.stringify(data, null, 2));
-    });
-  </script>
-
-</body>
-</html>
+<script>
+// --- DATA: Periode P1 (uit je Excel) ---
+const data = {
+  'P1': {
+    docenten: [
+      "Agt, Maartje van", "Bakker, Carla", "Boersma, Marjoleine", "Bos, Sjoerd", "Bovens, Willianne",
+      "Bree, Joost de", "Brouwer, Maayke de", "Dijk, Marieke van", "Dinther, David van", "Dool, Karin van den",
+      "Fransen, Anne", "Groenendaal, Marieke", "Hagedoorn, Elies", "Hoorens, Annemarijn", "Jaartsveld, Bart ",
+      "Lelkes, Paul", "Loos, Karlijn", "Mols, Ine", "Prinsen, Eric", "Senden, Mayk", "Sprong, Niels", "Schilder Jacqueline"
+    ],
+    modules: [
+      "SLB J5","SLB J4","SLB J3","Afstuderen blok 1","Afstuderen Workshops P1","Afstuderen kick-off",
+      "Stage P1","Stage voorlichting of workshops P1","Minor Innovation & Creativity P1","Minor Studio You P1",
+      "K1 SLB: de coach","K1 SLB: training scrum ","K1 Context: Public Challenges","K1 Context: Startup ",
+      "K1 Context: Enterprises ","K1 Business cases","BIP (blended intensive program - ontvangst)",
+      "J1 SLB: de coach","J1 SLB: vaardigheden samenwerken teams","P1 Innovatie ","P1 Project"
+    ],
+    uren: {
+      "Agt, Maartje van": {
+        "SLB J4": 5, "Stage P1": 30, "Stage voorlichting of workshops P1": 7, "K1 Context: Enterprises ": 50, "J1 SLB: de coach": 15, "P1 Project": 40
+      },
+      "Bakker, Carla": {
+        "SLB J4": 5, "Minor Studio You P1": 90, "J1 SLB: vaardigheden samenwerken teams": 40, "P1 Project": 40
+      },
+      "Boersma, Marjoleine": {
+        "SLB J5": 4, "Afstuderen blok 1": 40, "Stage P1": 30, "K1 SLB: training scrum ": 40, "J1 SLB: de coach": 15, "P1 Project": 70
+      },
+      "Bos, Sjoerd": {
+        "SLB J5": 4, "Afstuderen blok 1": 40, "Stage P1": 30, "K1 Business cases": 45, "J1 SLB: de coach": 15, "P1 Project": 40
+      },
+      "Bovens, Willianne": {
+        "Afstuderen blok 1": 40, "Afstuderen Workshops P1": 8, "Stage P1": 30, "K1 SLB: training scrum ": 60, "K1 Context: Startup ": 50, "J1 SLB: de coach": 15, "P1 Innovatie ": 100
+      },
+      "Bree, Joost de": {
+        "SLB J5": 4, "SLB J3": 10, "Afstuderen blok 1": 40, "Stage P1": 30, "J1 SLB: de coach": 15, "P1 Innovatie ": 70, "P1 Project": 40
+      },
+      "Brouwer, Maayke de": {
+        "SLB J4": 5, "Stage P1": 30, "K1 SLB: training scrum ": 20
+      },
+      "Dijk, Marieke van": {
+        "SLB J5": 4, "SLB J3": 5, "Stage P1": 30, "Minor Studio You P1": 90
+      },
+      "Dinther, David van": {
+        "SLB J5": 4, "Afstuderen blok 1": 40, "Afstuderen Workshops P1": 8, "Afstuderen kick-off": 4, "K1 SLB: training scrum ": 20, "P1 Innovatie ": 90
+      },
+      "Dool, Karin van den": {
+        "SLB J5": 4, "Afstuderen blok 1": 40, "Stage P1": 30, "Minor Innovation & Creativity P1": 70, "K1 SLB: training scrum ": 20, "J1 SLB: vaardigheden samenwerken teams": 10
+      },
+      "Fransen, Anne": {
+        "SLB J5": 4, "SLB J3": 10, "Stage P1": 60, "K1 Context: Public Challenges": 50, "P1 Innovatie ": 70, "P1 Project": 40
+      },
+      "Groenendaal, Marieke": {
+        "SLB J4": 5, "Afstuderen blok 1": 40, "Stage P1": 30, "Minor Studio You P1": 70, "J1 SLB: de coach": 15, "P1 Project": 40
+      },
+      "Hagedoorn, Elies": {
+        "Stage P1": 30, "K1 Context: Public Challenges": 70, "P1 Project": 40
+      },
+      "Hoorens, Annemarijn": {
+        "SLB J4": 5, "K1 SLB: training scrum ": 20, "K1 Context: Startup ": 40, "K1 Context: Public Challenges": 70
+      },
+      "Jaartsveld, Bart ": {
+        "SLB J5": 4, "SLB J3": 5, "Stage P1": 30, "Minor Innovation & Creativity P1": 70, "K1 Context: Startup ": 50, "J1 SLB: vaardigheden samenwerken teams": 10, "P1 Project": 70
+      },
+      "Lelkes, Paul": {
+        "
